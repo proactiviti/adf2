@@ -1,0 +1,93 @@
+{
+	"name": "TestValue",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set input_value",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "input_value",
+					"value": "1"
+				}
+			},
+			{
+				"name": "TestValue",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Set input_value",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Repos/alexluna@proactiviti.com/CDC-Azure/Version2/TestValue",
+					"baseParameters": {
+						"adf_input_value": {
+							"value": "@variables('input_value')",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks1",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Set output_value",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "TestValue",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "output_value",
+					"value": {
+						"value": "@activity('TestValue').output['runOutput']['adf_Output_value']",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"input_value": {
+				"type": "String"
+			},
+			"output_value": {
+				"type": "String"
+			},
+			"output": {
+				"type": "String"
+			},
+			"OutputTestA": {
+				"type": "String"
+			},
+			"OutputTestB": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "CDC"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-10-19T17:39:47Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

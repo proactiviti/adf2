@@ -1,0 +1,213 @@
+{
+	"name": "TestInsert",
+	"properties": {
+		"activities": [
+			{
+				"name": "TestInsert",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "LoadSourceToValidate",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Repos/alexluna@proactiviti.com/CDC-Azure/Version2/TestInsert",
+					"baseParameters": {
+						"adf_IdUpdate": {
+							"value": "@pipeline().parameters.IdInsert",
+							"type": "Expression"
+						},
+						"adf_source": {
+							"value": "@pipeline().parameters.Source",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks1",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ValidateInsert",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "TestInsert",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ValidateInsert",
+					"value": {
+						"value": "@activity('TestInsert').output['runOutput']['adf_output']",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "LoadSourceToValidate",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.Source,'DepartmentA')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "ValidateSourceB",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "@concat('select convert(varchar(32),HashBytes(''MD5'', concat(id,LastName,FirstName,Income,Department)),2) as ColHash from dbo.DepartmentB where Id in (',pipeline().parameters.IdInsert,')')",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "AzureSqlDepartmentB",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ValidateRows",
+									"type": "DatasetReference"
+								}
+							]
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "ValidateSourceA",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat('select convert(varchar(32),HashBytes(''MD5'', concat(id,LastName,FirstName,Income,Department)),2) as ColHash from dbo.DepartmentA where Id in (',pipeline().parameters.IdInsert,')')",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SqlServerDepartmentA",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ValidateRows",
+									"type": "DatasetReference"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"IdInsert": {
+				"type": "string",
+				"defaultValue": "1001,1002"
+			},
+			"Source": {
+				"type": "string",
+				"defaultValue": "DepartmentA"
+			}
+		},
+		"variables": {
+			"ValidateInsert": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "CDC/Test"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-10-31T18:24:40Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

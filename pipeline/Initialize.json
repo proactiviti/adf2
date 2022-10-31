@@ -1,0 +1,106 @@
+{
+	"name": "Initialize",
+	"properties": {
+		"activities": [
+			{
+				"name": "InitializeSQL_OnPremise",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderStoredProcedureName": "[dbo].[Initialize]",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SqlServerDepartmentA",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "InitializeSQL_Cloud",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[Initialize]",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSqlDepartmentB",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "InitializeTables",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "InitializeSQL_OnPremise",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "InitializeSQL_Cloud",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Repos/alexluna@proactiviti.com/CDC-Azure/Version2/Initialize"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks1",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"variables": {
+			"OutputTestA": {
+				"type": "String"
+			},
+			"OutputTestB": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "CDC"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-10-19T17:39:47Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,184 @@
+{
+	"name": "SourceCompany",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "BlobStorageCompanyB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "sourcecompany"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Prop_0",
+				"type": "String"
+			},
+			{
+				"name": "YEAR",
+				"type": "String"
+			},
+			{
+				"name": "LAST NAME",
+				"type": "String"
+			},
+			{
+				"name": "FIRST NAME",
+				"type": "String"
+			},
+			{
+				"name": "MIDDLE INIT",
+				"type": "String"
+			},
+			{
+				"name": "DEPARTMENT NUMBER",
+				"type": "String"
+			},
+			{
+				"name": "DEPARTMENT NAME",
+				"type": "String"
+			},
+			{
+				"name": "PAY LOCATION CODE",
+				"type": "String"
+			},
+			{
+				"name": "PAY LOCATION DESCRIPTION",
+				"type": "String"
+			},
+			{
+				"name": "JOB CODE",
+				"type": "String"
+			},
+			{
+				"name": "JOB TITLE",
+				"type": "String"
+			},
+			{
+				"name": "CURRENT HIRE DATE",
+				"type": "String"
+			},
+			{
+				"name": "EMPLOYMENT END DATE",
+				"type": "String"
+			},
+			{
+				"name": "EMPLOYMENT STATUS",
+				"type": "String"
+			},
+			{
+				"name": "BASE PAY",
+				"type": "String"
+			},
+			{
+				"name": "GROSS PAY",
+				"type": "String"
+			},
+			{
+				"name": "TOTAL OT HOURS",
+				"type": "String"
+			},
+			{
+				"name": "TOTAL OT PAY",
+				"type": "String"
+			},
+			{
+				"name": "SEVERANCE PAY",
+				"type": "String"
+			},
+			{
+				"name": "SHIFT DIFFERENTIAL PAY",
+				"type": "String"
+			},
+			{
+				"name": "PAY ADJUSTMENTS",
+				"type": "String"
+			},
+			{
+				"name": "CAR ALLOWANCE",
+				"type": "String"
+			},
+			{
+				"name": "MEAL ALLOWANCE",
+				"type": "String"
+			},
+			{
+				"name": "STATE SUPPLEMENTAL JP",
+				"type": "String"
+			},
+			{
+				"name": "EDUCATION PAY",
+				"type": "String"
+			},
+			{
+				"name": "TRANSFER COMPENSATION",
+				"type": "String"
+			},
+			{
+				"name": "SPECIAL ASSIGNMENT",
+				"type": "String"
+			},
+			{
+				"name": "ENGINEER LICENSE",
+				"type": "String"
+			},
+			{
+				"name": "POLICE SUIT ALLOWANCE",
+				"type": "String"
+			},
+			{
+				"name": "WORKERS COMP",
+				"type": "String"
+			},
+			{
+				"name": "EMPLOYEE REIMBURSEMENT",
+				"type": "String"
+			},
+			{
+				"name": "STATE 2 PERCENT",
+				"type": "String"
+			},
+			{
+				"name": "PRISON ASSIGNMENT",
+				"type": "String"
+			},
+			{
+				"name": "HAZARDOUS PAY",
+				"type": "String"
+			},
+			{
+				"name": "EMPLOYEE REFUND",
+				"type": "String"
+			},
+			{
+				"name": "LONGEVITY",
+				"type": "String"
+			},
+			{
+				"name": "COMMANDER PAY",
+				"type": "String"
+			},
+			{
+				"name": "FIELD TRAINING PAY",
+				"type": "String"
+			},
+			{
+				"name": "AVIATION PAY",
+				"type": "String"
+			},
+			{
+				"name": "UNIQUEID",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

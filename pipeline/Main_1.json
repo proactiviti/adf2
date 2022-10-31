@@ -1,0 +1,109 @@
+{
+	"name": "Main_1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Validate Initialize",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.Initialize,'Yes')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Simulate_1",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Simulate_1",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Initialize",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Initialize",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Testing",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Cdc_Watermark_test",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Testing_1",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Cdc_Watermark_test",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Validate Initialize",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Cdc_Watermark_test",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"parameters": {
+			"Initialize": {
+				"type": "string",
+				"defaultValue": "Yes"
+			}
+		},
+		"variables": {
+			"OutputTestA": {
+				"type": "String"
+			},
+			"OutputTestB": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "CDC"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-10-31T21:10:57Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,300 @@
+{
+	"name": "Cdc_Watermark_test",
+	"properties": {
+		"activities": [
+			{
+				"name": "SqlServerOnPremise-Csv",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [
+					{
+						"name": "Source",
+						"value": "dbo.Cdc"
+					},
+					{
+						"name": "Destination",
+						"value": "raw//DepartmentA.csv"
+					}
+				],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"additionalColumns": [
+							{
+								"name": "EtlName",
+								"value": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "EtlDateTime",
+								"value": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								}
+							}
+						],
+						"sqlReaderQuery": "select * from [dbo].[DepartmentA]",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings",
+							"metadata": [
+								{
+									"name": "EtlName",
+									"value": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									}
+								},
+								{
+									"name": "EtlDateTime",
+									"value": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									}
+								}
+							]
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SqlServerDepartmentA",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DepartmentAcsv",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "SqlServerCloud-Parquet",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [
+					{
+						"name": "Source",
+						"value": "dbo.DepartmentB"
+					},
+					{
+						"name": "Destination",
+						"value": "raw//DepartmentB.parquet"
+					}
+				],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"additionalColumns": [
+							{
+								"name": "EtlName",
+								"value": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "EtlDateTime",
+								"value": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								}
+							}
+						],
+						"sqlReaderQuery": "select * from dbo.DepartmentB",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings",
+							"metadata": [
+								{
+									"name": "EtlName",
+									"value": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									}
+								},
+								{
+									"name": "EtlDateTime",
+									"value": {
+										"value": "@pipeline().TriggerTime",
+										"type": "Expression"
+									}
+								}
+							]
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AzureSqlDepartmentB",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DepartmentBparquet",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Preprocessing-Raw-Sql-Cloud",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "SqlServerCloud-Parquet",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Repos/alexluna@proactiviti.com/CDC-Azure/Version2/Preprocessing-Raw-Sql-Cloud_version2"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks1",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Preprocessing-Raw-Sql-OnPremise",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "SqlServerOnPremise-Csv",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Repos/alexluna@proactiviti.com/CDC-Azure/Version2/Preprocessing-Raw-Sql-OnPremise_version2"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks1",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "UpdateCDC-Curated",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "Preprocessing-Raw-Sql-OnPremise",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Preprocessing-Raw-Sql-Cloud",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Repos/alexluna@proactiviti.com/CDC-Azure/Version2/UpdateCDC-Curated"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks1",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"variables": {
+			"valorx": {
+				"type": "String"
+			},
+			"EtlName": {
+				"type": "String"
+			},
+			"EtlDateTime": {
+				"type": "String"
+			},
+			"output": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "CDC"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-10-19T21:34:41Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,75 @@
+{
+	"name": "Simulate_2",
+	"properties": {
+		"activities": [
+			{
+				"name": "Test_SQLOnPremise",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderStoredProcedureName": {
+							"value": "@variables('Test')",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SqlServerDepartmentA",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Test_SQLCloud",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": {
+							"value": "@variables('Test')",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSqlDepartmentB",
+						"type": "DatasetReference"
+					}
+				}
+			}
+		],
+		"variables": {
+			"Test": {
+				"type": "String",
+				"defaultValue": "dbo.Test_2"
+			}
+		},
+		"folder": {
+			"name": "CDC"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-10-19T21:17:18Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

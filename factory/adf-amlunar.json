@@ -1,0 +1,9 @@
+{
+	"name": "adf-amlunar",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "c82e2db0-11dd-486d-bfb2-40943f70b729",
+		"tenantId": "8fdc7f73-58b9-4961-af2e-9f40ed937c5f"
+	}
+}

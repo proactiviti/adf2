@@ -1,0 +1,177 @@
+{
+	"name": "Testing_2",
+	"properties": {
+		"activities": [
+			{
+				"name": "CountDepartmentA_SQL",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "select count(1) as Count from dbo.DepartmentA \nwhere PaymentDate = (select max(PaymentDate ) as Count from dbo.DepartmentA)",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SqlServerDepartmentA",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "CountDeparmentB_SQL",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select count(1) as Count from dbo.DepartmentB where PaymentDate = (select max(PaymentDate ) as Count from dbo.DepartmentB)",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSqlDepartmentB",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "TestA",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "CountDepartmentA_SQL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Repos/alexluna@proactiviti.com/CDC-Azure/Version2/TestA",
+					"baseParameters": {
+						"adf_CountA": {
+							"value": "@string(activity('CountDepartmentA_SQL').output.firstRow)",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks1",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ValidationA",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "TestA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "OutputTestA",
+					"value": {
+						"value": "@activity('TestA').output['runOutput']['adf_output_value']",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "TestB",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "CountDeparmentB_SQL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Repos/alexluna@proactiviti.com/CDC-Azure/Version2/TestB",
+					"baseParameters": {
+						"adf_CountB": {
+							"value": "@string(activity('CountDeparmentB_SQL').output.firstRow)",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks1",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ValidationB",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "TestB",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "OutputTestB",
+					"value": {
+						"value": "@activity('TestB').output['runOutput']['adf_output_value']",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"OutputTestA": {
+				"type": "String"
+			},
+			"OutputTestB": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "CDC"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-10-19T21:53:38Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
