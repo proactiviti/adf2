@@ -9,7 +9,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@equals(pipeline().parameters.Initialize,'Yes')",
+						"value": "@and(equals(pipeline().parameters.Initialize,'Yes'),lessOrEquals(int(variables('Counter')), 3))",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
@@ -83,6 +83,22 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "Wait1",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "Validate Initialize",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 120
+				}
 			}
 		],
 		"parameters": {
@@ -97,6 +113,14 @@
 			},
 			"OutputTestB": {
 				"type": "String"
+			},
+			"Counter": {
+				"type": "String",
+				"defaultValue": "0"
+			},
+			"TempCounter": {
+				"type": "String",
+				"defaultValue": "0"
 			}
 		},
 		"folder": {
